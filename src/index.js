@@ -1,30 +1,33 @@
 module.exports = function check(str, bracketsConfig) {
-  const map = new Map();
+  let map = new Map();
+
   const stack = [];
+  const sameBrackets = [];
   let count = 0;
 
   bracketsConfig.forEach((brackets) => {
-    if (brackets.includes('|')) {
-      count = 0;
+    if (brackets[0] === brackets[1]) {
+      sameBrackets.push(brackets[0]);
     } else {
-      map.set(brackets[1], brackets[0]);
+      map.set(brackets[0], brackets[1]);
     }
   });
 
-  const openBrackets = Array.from(map.values());
-  const closedBrackets = Array.from(map.keys());
-
   for (let i = 0; i < str.length; i++) {
-    if (str[i] === '|') {
+    if (sameBrackets.includes(str[i]) && count % 2 === 0) {
       count++;
-    } else if (openBrackets.includes(str[i])) {
+    } else if (map.has(str[i]) && count % 2 === 0) {
       stack.push(str[i]);
-    } else if (closedBrackets.includes(str[i]) && map.get(str[i]) === stack[stack.length - 1]) {
-      stack.pop();
     } else {
-      return false;
+      if (sameBrackets.includes(str[i]) && count % 2 !== 0) {
+        count--;
+      } else if (map.get(stack[stack.length - 1]) === str[i]) {
+        stack.pop();
+      } else if (stack.length === 0 && count === 0) {
+        return false;
+      }
     }
   }
 
-  return (stack.length === 0) && (count % 2 === 0);
+  return stack.length === 0 && count === 0; // stack.length === 0
 };
